@@ -102,7 +102,7 @@ async function loadCandies() {
   ];
 }
 
-let candies = loadCandies();
+let candies = []; // Se llena en init() con await loadCandies()
 
 // Estado del carrito y filtros
 let cart = {};
@@ -697,8 +697,8 @@ function mapToEditPanelValues(cfg) {
 
 // Inicialización
 async function init() {
-  // Recargar productos desde localStorage por si fueron actualizados en admin
-  candies = loadCandies();
+  // Cargar productos (await necesario porque loadCandies es async)
+  candies = await loadCandies();
 
   if (window.dataSdk) {
     const result = await window.dataSdk.init(dataHandler);

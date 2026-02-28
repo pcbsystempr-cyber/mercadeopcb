@@ -95,7 +95,7 @@
           <table class="w-full">
             <thead class="bg-white/5 border-b border-white/10">
               <tr>
-                <th class="px-6 py-4 text-left text-sm font-semibold">Emoji</th>
+                <th class="px-6 py-4 text-left text-sm font-semibold">Foto</th>
                 <th class="px-6 py-4 text-left text-sm font-semibold">Nombre</th>
                 <th class="px-6 py-4 text-left text-sm font-semibold">Categoría</th>
                 <th class="px-6 py-4 text-left text-sm font-semibold">Precio</th>
@@ -152,6 +152,39 @@
                 <option value="snacks">🍿 Snacks</option>
               </select>
             </div>
+          </div>
+
+          <!-- Foto del Producto -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-300 mb-2">📸 Foto del Producto</label>
+
+            <!-- Preview -->
+            <div id="image-preview-container" class="hidden mb-3 text-center">
+              <img id="image-preview" src="" alt="Preview"
+                class="w-28 h-28 object-contain mx-auto rounded-xl border border-white/10 bg-white/5 p-2">
+              <button type="button" onclick="clearImage()"
+                class="mt-2 text-xs text-red-400 hover:text-red-300 transition-colors">
+                ✕ Quitar foto
+              </button>
+            </div>
+
+            <!-- Subir archivo -->
+            <label class="flex items-center gap-3 w-full cursor-pointer bg-white/5 border border-dashed border-white/20 hover:border-[#3b82f6] rounded-lg px-4 py-3 transition-colors mb-2">
+              <span class="text-2xl">📁</span>
+              <div class="flex-1">
+                <p class="text-sm font-semibold text-white">Subir desde el dispositivo</p>
+                <p class="text-xs text-gray-400">JPG, PNG, WebP — máx. 2 MB</p>
+              </div>
+              <input type="file" id="product-image-file" accept="image/*" class="hidden" onchange="handleImageFile(this)">
+            </label>
+
+            <!-- O URL externa -->
+            <div class="flex items-center gap-2 text-gray-500 text-xs mb-2">
+              <div class="flex-1 h-px bg-white/10"></div>o pega una URL<div class="flex-1 h-px bg-white/10"></div>
+            </div>
+            <input type="url" id="product-image-url" placeholder="https://ejemplo.com/foto.jpg"
+              class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:border-[#3b82f6] focus:outline-none transition-colors text-sm"
+              oninput="handleImageUrl(this.value)">
           </div>
 
           <div>

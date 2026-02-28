@@ -4,6 +4,69 @@ if (typeof isAuthenticated === 'function' && !isAuthenticated()) {
 }
 
 let products = [];
+let pendingImageFile = null; // archivo seleccionado pendiente de subir
+
+// =====================================================
+// MANEJO DE IMAGEN
+// =====================================================
+
+function handleImageFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 2 * 1024 * 1024) {
+    showToast('⚠️ La imagen no puede superar 2 MB', 'error');
+    input.value = '';
+    return;
+  }
+  pendingImageFile = file;
+  document.getElementById('product-image-url').value = '';
+  const reader = new FileReader();
+  reader.onload = e => showImagePreview(e.target.result);
+  reader.readAsDataURL(file);
+}
+
+function handleImageUrl(url) {
+  pendingImageFile = null;
+  document.getElementById('product-image-file').value = '';
+  if (url) showImagePreview(url);
+  else hideImagePreview();
+}
+
+function showImagePreview(src) {
+  const container = document.getElementById('image-preview-container');
+  const img = document.getElementById('image-preview');
+  img.src = src;
+  container.classList.remove('hidden');
+}
+
+function hideImagePreview() {
+  document.getElementById('image-preview-container').classList.add('hidden');
+  document.getElementById('image-preview').src = '';
+}
+
+function clearImage() {
+  pendingImageFile = null;
+  document.getElementById('product-image-file').value = '';
+  document.getElementById('product-image-url').value = '';
+  hideImagePreview();
+}
+
+async function resolveImageUrl() {
+  // Si hay archivo, subirlo a Supabase Storage
+  if (pendingImageFile && typeof DB !== 'undefined' && typeof DB.uploadImage === 'function') {
+    try {
+      const url = await DB.uploadImage(pendingImageFile);
+      if (url) return url;
+    } catch (e) {
+      console.error('Error subiendo imagen:', e.message);
+      showToast('⚠️ No se pudo subir la imagen, guardando sin foto', 'info');
+    }
+  }
+  // Si hay URL manual, usarla
+  const urlInput = document.getElementById('product-image-url').value.trim();
+  if (urlInput) return urlInput;
+  return null;
+}
 
 // Cargar productos desde Supabase o localStorage al iniciar
 async function loadProducts() {
@@ -46,7 +109,13 @@ function renderProducts() {
 
   tbody.innerHTML = products.map(product => `
     <tr class="border-b border-white/5 hover:bg-white/5 transition-colors">
-      <td class="px-6 py-4 text-2xl">${product.emoji || '🍬'}</td>
+      <td class="px-6 py-4">
+        ${product.image || product.image_url
+          ? `<img src="${product.image || product.image_url}" alt="${product.name}"
+               class="w-12 h-12 object-contain rounded-lg bg-white/5 border border-white/10 p-1"
+               onerror="this.outerHTML='<span class=\'text-2xl\'>${product.emoji || '🍬'}</span>'">`
+          : `<span class="text-2xl">${product.emoji || '🍬'}</span>`}
+      </td>
       <td class="px-6 py-4 font-semibold">${product.name}</td>
       <td class="px-6 py-4 text-sm">${getCategoryName(product.category)}</td>
       <td class="px-6 py-4 font-bold text-[#f59e0b]">$${parseFloat(product.price).toFixed(2)}</td>
@@ -77,20 +146,29 @@ function showAddProductModal() {
   document.getElementById('modal-title').textContent = 'Añadir Producto';
   document.getElementById('product-form').reset();
   document.getElementById('product-id').value = '';
+  clearImage();
   document.getElementById('product-modal').classList.add('active');
 }
 
 function editProduct(id) {
   const product = products.find(p => String(p.id) === String(id));
   if (!product) return;
-  
+
   document.getElementById('modal-title').textContent = 'Editar Producto';
   document.getElementById('product-id').value = product.id;
   document.getElementById('product-name').value = product.name;
-  document.getElementById('product-emoji').value = product.emoji;
+  document.getElementById('product-emoji').value = product.emoji || '';
   document.getElementById('product-price').value = product.price;
   document.getElementById('product-category').value = product.category;
   document.getElementById('product-popular').checked = product.popular;
+
+  // Cargar imagen existente
+  clearImage();
+  const existingImage = product.image || product.image_url || '';
+  if (existingImage) {
+    document.getElementById('product-image-url').value = existingImage;
+    showImagePreview(existingImage);
+  }
   document.getElementById('product-modal').classList.add('active');
 }
 
@@ -115,12 +193,14 @@ document.getElementById('product-form').addEventListener('submit', async (e) => 
   e.preventDefault();
 
   const id = document.getElementById('product-id').value;
+  const imageUrl = await resolveImageUrl();
   const productData = {
     name: document.getElementById('product-name').value,
     emoji: document.getElementById('product-emoji').value,
     price: parseFloat(document.getElementById('product-price').value),
     category: document.getElementById('product-category').value,
-    popular: document.getElementById('product-popular').checked
+    popular: document.getElementById('product-popular').checked,
+    ...(imageUrl && { image: imageUrl, image_url: imageUrl })
   };
 
   if (id) {
