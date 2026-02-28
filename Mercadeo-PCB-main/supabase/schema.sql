@@ -135,29 +135,43 @@ ALTER TABLE favorites ENABLE ROW LEVEL SECURITY;
 ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
 
 -- Products: Everyone can read, only authenticated can modify
+DROP POLICY IF EXISTS "Products are viewable by everyone" ON products;
+DROP POLICY IF EXISTS "Products can be updated by authenticated users" ON products;
 CREATE POLICY "Products are viewable by everyone" ON products FOR SELECT USING (is_active = true);
 CREATE POLICY "Products can be updated by authenticated users" ON products FOR ALL USING (auth.role() = 'authenticated');
 
 -- Orders: All access for simplicity
+DROP POLICY IF EXISTS "Anyone can view orders" ON orders;
+DROP POLICY IF EXISTS "Anyone can insert orders" ON orders;
+DROP POLICY IF EXISTS "Anyone can update orders" ON orders;
+DROP POLICY IF EXISTS "Anyone can delete orders" ON orders;
 CREATE POLICY "Anyone can view orders" ON orders FOR SELECT USING (true);
 CREATE POLICY "Anyone can insert orders" ON orders FOR INSERT WITH CHECK (true);
 CREATE POLICY "Anyone can update orders" ON orders FOR UPDATE USING (true);
 CREATE POLICY "Anyone can delete orders" ON orders FOR DELETE USING (true);
 
 -- Users: All access for simplicity
+DROP POLICY IF EXISTS "Anyone can view users" ON users;
+DROP POLICY IF EXISTS "Anyone can insert users" ON users;
+DROP POLICY IF EXISTS "Anyone can update users" ON users;
+DROP POLICY IF EXISTS "Anyone can delete users" ON users;
 CREATE POLICY "Anyone can view users" ON users FOR SELECT USING (true);
 CREATE POLICY "Anyone can insert users" ON users FOR INSERT WITH CHECK (true);
 CREATE POLICY "Anyone can update users" ON users FOR UPDATE USING (true);
 CREATE POLICY "Anyone can delete users" ON users FOR DELETE USING (true);
 
 -- Config: Everyone can read, only authenticated can modify
+DROP POLICY IF EXISTS "Config is viewable by everyone" ON config;
+DROP POLICY IF EXISTS "Config can be updated by authenticated users" ON config;
 CREATE POLICY "Config is viewable by everyone" ON config FOR SELECT USING (true);
 CREATE POLICY "Config can be updated by authenticated users" ON config FOR ALL USING (auth.role() = 'authenticated');
 
 -- Favorites: All access
+DROP POLICY IF EXISTS "Anyone can manage favorites" ON favorites;
 CREATE POLICY "Anyone can manage favorites" ON favorites FOR ALL USING (true);
 
 -- Notifications: All access
+DROP POLICY IF EXISTS "Anyone can manage notifications" ON notifications;
 CREATE POLICY "Anyone can manage notifications" ON notifications FOR ALL USING (true);
 
 -- =====================================================
