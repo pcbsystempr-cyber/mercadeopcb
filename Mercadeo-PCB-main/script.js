@@ -277,6 +277,12 @@ function updateCart() {
 }
 
 function getFilteredCandies() {
+  // Verificar que candies sea un array válido
+  if (!Array.isArray(candies) || candies.length === 0) {
+    console.warn('⚠️ candies no está cargado o está vacío');
+    return [];
+  }
+  
   let filtered = candies;
 
   // Filtrar por categoría

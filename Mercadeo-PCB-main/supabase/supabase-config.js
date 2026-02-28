@@ -46,8 +46,7 @@ function initSupabase() {
   if (supabaseClient) return supabaseClient;
   
   // Check if Supabase is configured (solo bloquear si aún tiene valores de ejemplo)
-  if (!SUPABASE_CONFIG.url || SUPABASE_CONFIG.url === 'YOUR_SUPABASE_PROJECT_URL' ||
-      !SUPABASE_CONFIG.anonKey || SUPABASE_CONFIG.anonKey === 'YOUR_SUPABASE_ANON_KEY') {
+  if (!SUPABASE_CONFIG.url || !SUPABASE_CONFIG.anonKey) {
     console.warn('⚠️ Supabase not configured. Using localStorage fallback.');
     return null;
   }
@@ -96,8 +95,7 @@ function initSupabase() {
  */
 function isSupabaseConfigured() {
   return supabaseClient !== null || 
-    (SUPABASE_CONFIG.url !== 'YOUR_SUPABASE_PROJECT_URL' && 
-     SUPABASE_CONFIG.anonKey !== 'YOUR_SUPABASE_ANON_KEY');
+    (!!SUPABASE_CONFIG.url && !!SUPABASE_CONFIG.anonKey);
 }
 
 /**
