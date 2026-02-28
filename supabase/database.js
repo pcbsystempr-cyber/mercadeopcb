@@ -368,6 +368,32 @@ const DB = {
     return notifData;
   },
 
+  // =====================================================
+  // IMÁGENES (Supabase Storage)
+  // =====================================================
+
+  /**
+   * Sube una imagen al bucket 'product-images' de Supabase Storage
+   * y devuelve la URL pública.
+   * Requisito: crear el bucket 'product-images' con acceso público en Supabase.
+   */
+  async uploadImage(file) {
+    const client = (typeof getSupabase === 'function') ? getSupabase() : null;
+    if (!client) throw new Error('Supabase no configurado');
+
+    const ext = file.name.split('.').pop();
+    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+
+    const { error } = await client.storage
+      .from('product-images')
+      .upload(fileName, file, { upsert: false, contentType: file.type });
+
+    if (error) throw new Error(error.message);
+
+    const { data } = client.storage.from('product-images').getPublicUrl(fileName);
+    return data.publicUrl;
+  },
+
   async markNotificationRead(notificationId) {
     const client = (typeof getSupabase === 'function') ? getSupabase() : null;
     if (client) {
